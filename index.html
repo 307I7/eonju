@@ -1,0 +1,700 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>뭐먹지? | 단계별 맞춤 메뉴 추천</title>
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- FontAwesome Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- Google Fonts (Gowun Dodum & Noto Sans KR) -->
+    <link href="https://fonts.googleapis.com/css2?family=Gowun+Dodum&family=Noto+Sans+KR:wght@300;400;600;700;900&display=swap" rel="stylesheet">
+    <!-- Canvas Confetti Library -->
+    <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
+    
+    <style>
+        body {
+            font-family: 'Noto Sans KR', sans-serif;
+            background: linear-gradient(135deg, #FFF9F2 0%, #FFEEDD 100%);
+            min-height: 100vh;
+        }
+        .font-title {
+            font-family: 'Gowun Dodum', cursive, sans-serif;
+        }
+        .pop-card {
+            background: rgba(255, 255, 255, 0.92);
+            backdrop-filter: blur(16px);
+            -webkit-backdrop-filter: blur(16px);
+            box-shadow: 0 20px 40px -15px rgba(251, 146, 60, 0.15), 0 0 15px rgba(0,0,0,0.03);
+        }
+        .btn-pop {
+            transition: all 0.2s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+        }
+        .btn-pop:hover {
+            transform: translateY(-4px) scale(1.02);
+        }
+        .btn-pop:active {
+            transform: translateY(1px) scale(0.97);
+        }
+        @keyframes floatSlow {
+            0%, 100% { transform: translateY(0px) rotate(0deg); }
+            50% { transform: translateY(-8px) rotate(3deg); }
+        }
+        .animate-float {
+            animation: floatSlow 3s ease-in-out infinite;
+        }
+    </style>
+</head>
+<body class="text-gray-800 flex flex-col justify-between items-center p-4 sm:p-6 min-h-screen relative overflow-x-hidden">
+
+    <!-- Header Logo -->
+    <header class="w-full max-w-lg text-center mt-2 mb-4">
+        <button onclick="goToStep(0)" class="inline-flex items-center gap-2 group focus:outline-none">
+            <span class="text-3xl sm:text-4xl">😋</span>
+            <h1 class="text-3xl sm:text-4xl font-black tracking-tight text-orange-600 font-title group-hover:scale-105 transition-transform">
+                뭐먹지<span class="text-amber-500">?</span>
+            </h1>
+        </button>
+        <p class="text-xs sm:text-sm text-amber-800/70 font-semibold mt-1">오늘 당신의 완벽한 한 끼를 맞춰드립니다!</p>
+    </header>
+
+    <!-- Main Dynamic Card Container -->
+    <main class="w-full max-w-lg pop-card rounded-3xl p-6 sm:p-8 border-2 border-orange-100/80 relative flex-1 flex flex-col justify-between my-2">
+        
+        <!-- Progress Bar & Top Navigation Container -->
+        <div id="progressNav" class="w-full mb-6 hidden">
+            <div class="flex items-center justify-between text-xs font-bold text-gray-500 mb-2">
+                <button id="backBtn" onclick="goBack()" class="flex items-center gap-1 text-orange-500 hover:text-orange-700 transition font-semibold">
+                    <i class="fa-solid fa-chevron-left"></i> 이전 단계
+                </button>
+                <span id="stepIndicator" class="bg-orange-100 text-orange-700 px-2.5 py-0.5 rounded-full">1 / 3 단계</span>
+            </div>
+            <!-- Progress Line -->
+            <div class="w-full bg-gray-100 h-2.5 rounded-full overflow-hidden border border-orange-100">
+                <div id="progressBar" class="bg-gradient-to-r from-orange-400 to-amber-500 h-full w-1/3 transition-all duration-300 rounded-full"></div>
+            </div>
+        </div>
+
+        <section id="step0" class="flex flex-col items-center justify-center text-center space-y-6 my-auto py-4">
+            <div class="relative animate-float">
+                <div class="w-32 h-32 sm:w-40 sm:h-40 bg-orange-100 rounded-full flex items-center justify-center text-7xl sm:text-8xl shadow-inner border-4 border-white">
+                    🍱
+                </div>
+                <span class="absolute -top-2 -right-2 bg-amber-500 text-white text-xs font-black px-3 py-1 rounded-full shadow">오늘의 메뉴</span>
+            </div>
+            
+            <div class="space-y-2">
+                <h2 class="text-2xl sm:text-3xl font-extrabold text-gray-900 font-title">
+                    오늘 어떤 걸 드시고 싶나요?
+                </h2>
+                <p class="text-sm text-gray-600 leading-relaxed max-w-xs mx-auto">
+                    몇 가지 간단한 질문에 답하고<br>딱 맞는 취향저격 메뉴를 추천받아보세요!
+                </p>
+            </div>
+
+            <button onclick="startApp()" class="btn-pop w-full bg-gradient-to-r from-orange-500 to-amber-500 hover:from-orange-600 hover:to-amber-600 text-white font-extrabold text-xl py-4 rounded-2xl shadow-lg shadow-orange-500/30 flex items-center justify-center gap-2 mt-4">
+                <i class="fa-solid fa-play text-lg"></i>
+                <span>시작하기</span>
+            </button>
+        </section>
+
+        <section id="step1" class="hidden flex-col items-center justify-center text-center space-y-5 my-auto">
+            <div class="text-center">
+                <span class="text-xs font-black text-orange-500 uppercase tracking-widest">STEP 1</span>
+                <h2 class="text-2xl font-bold text-gray-900 font-title mt-1">어떤 종류를 찾으시나요?</h2>
+            </div>
+
+            <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 w-full pt-2">
+                <!-- Meal Button -->
+                <button onclick="selectType('meal')" class="btn-pop p-6 bg-gradient-to-br from-orange-50 to-amber-50 border-2 border-orange-200 rounded-2xl flex flex-col items-center text-center group hover:border-orange-400">
+                    <span class="text-6xl mb-3 group-hover:scale-110 transition-transform">🍲</span>
+                    <span class="text-xl font-bold text-gray-900">든든한 식사</span>
+                    <span class="text-xs text-gray-500 mt-1">한식, 일식, 중식, 양식 등</span>
+                </button>
+
+                <!-- Dessert Button -->
+                <button onclick="selectType('dessert')" class="btn-pop p-6 bg-gradient-to-br from-pink-50 to-rose-50 border-2 border-pink-200 rounded-2xl flex flex-col items-center text-center group hover:border-pink-400">
+                    <span class="text-6xl mb-3 group-hover:scale-110 transition-transform">🍰</span>
+                    <span class="text-xl font-bold text-gray-900">달콤한 디저트</span>
+                    <span class="text-xs text-gray-500 mt-1">케이크, 카페, 음료, 떡 등</span>
+                </button>
+            </div>
+        </section>
+
+        <section id="step2" class="hidden flex-col items-center justify-center space-y-4 my-auto">
+            <div class="text-center">
+                <span class="text-xs font-black text-orange-500 uppercase tracking-widest">STEP 2</span>
+                <h2 id="step2Title" class="text-2xl font-bold text-gray-900 font-title mt-1">음식 스타일을 선택해주세요</h2>
+            </div>
+
+            <!-- Options Grid (Dynamically Populated) -->
+            <div id="step2Grid" class="grid grid-cols-2 gap-3 w-full pt-2">
+                <!-- Buttons dynamically rendered via JS -->
+            </div>
+        </section>
+
+        <section id="step3" class="hidden flex-col items-center justify-center space-y-4 my-auto">
+            <div class="text-center">
+                <span class="text-xs font-black text-orange-500 uppercase tracking-widest">STEP 3</span>
+                <h2 class="text-2xl font-bold text-gray-900 font-title mt-1">선호하는 주요 재료/종류는?</h2>
+            </div>
+
+            <!-- Options Grid (Dynamically Populated) -->
+            <div id="step3Grid" class="grid grid-cols-2 gap-3 w-full pt-2">
+                <!-- Buttons dynamically rendered via JS -->
+            </div>
+        </section>
+
+        <section id="step4" class="hidden flex-col items-center justify-center text-center space-y-5 my-auto">
+            
+            <!-- Result Box Card -->
+            <div class="w-full bg-gradient-to-b from-orange-50/90 to-amber-50/90 border-2 border-orange-200 rounded-2xl p-6 text-center relative overflow-hidden min-h-[240px] flex flex-col justify-center items-center shadow-inner">
+                
+                <!-- Spinning Slot Animation Screen -->
+                <div id="spinScreen" class="flex flex-col items-center justify-center space-y-2">
+                    <span id="spinEmoji" class="text-7xl transition-transform animate-bounce">🎲</span>
+                    <h3 id="spinName" class="text-2xl font-black text-orange-600">메뉴 찾는 중...</h3>
+                    <span id="spinCategoryTag" class="text-xs bg-orange-200 text-orange-800 px-3 py-1 rounded-full font-bold">맞춤 메뉴 탐색</span>
+                </div>
+
+                <!-- Final Result Screen -->
+                <div id="resultScreen" class="hidden flex-col items-center justify-center w-full">
+                    <div class="relative">
+                        <span id="resEmoji" class="text-7xl sm:text-8xl drop-shadow-md">🥘</span>
+                        <span id="resTags" class="absolute -top-2 -right-4 text-[11px] font-bold bg-orange-500 text-white px-3 py-1 rounded-full shadow">한식 > 밥류</span>
+                    </div>
+                    
+                    <h2 id="resName" class="text-3xl sm:text-4xl font-black text-gray-900 mt-4 mb-2 tracking-tight">제육볶음</h2>
+                    <p id="resDesc" class="text-gray-600 text-sm font-medium mb-4 italic px-2">"매콤달콤 양념에 불향 가득한 국민 밥도둑!"</p>
+
+                    <!-- Map Search External Links -->
+                    <div class="flex items-center justify-center gap-2 w-full pt-3 border-t border-orange-200/60">
+                        <span class="text-xs text-gray-500 font-bold mr-1">주변 맛집:</span>
+                        <a id="naverMapLink" href="#" target="_blank" class="flex items-center gap-1.5 px-3 py-1.5 bg-[#03C75A] text-white text-xs font-bold rounded-xl shadow hover:opacity-90 transition">
+                            <i class="fa-solid fa-map-location-dot"></i> 네이버 지도
+                        </a>
+                        <a id="kakaoMapLink" href="#" target="_blank" class="flex items-center gap-1.5 px-3 py-1.5 bg-[#FEE500] text-[#191919] text-xs font-bold rounded-xl shadow hover:opacity-90 transition">
+                            <i class="fa-solid fa-location-arrow"></i> 카카오 맵
+                        </a>
+                    </div>
+                </div>
+
+            </div>
+
+            <!-- Action Buttons -->
+            <div id="resultActions" class="hidden flex-col gap-2.5 w-full">
+                <!-- Re-spin Button -->
+                <button onclick="rollRandomMenu()" class="btn-pop w-full bg-gradient-to-r from-orange-500 to-amber-500 hover:from-orange-600 hover:to-amber-600 text-white font-extrabold text-base py-3.5 px-4 rounded-xl shadow-md flex items-center justify-center gap-2">
+                    <i class="fa-solid fa-rotate-right"></i>
+                    <span>다른 메뉴 추천받기 (다시 뽑기)</span>
+                </button>
+
+                <!-- Final Select & Reset Button -->
+                <button onclick="confirmAndReset()" class="btn-pop w-full bg-emerald-500 hover:bg-emerald-600 text-white font-extrabold text-base py-3.5 px-4 rounded-xl shadow-md flex items-center justify-center gap-2">
+                    <i class="fa-solid fa-circle-check"></i>
+                    <span>이걸로 결정! (처음으로)</span>
+                </button>
+            </div>
+        </section>
+
+    </main>
+
+    <!-- Footer -->
+    <footer class="text-center text-xs text-amber-900/50 mt-4 mb-2">
+        <p>© 2026 뭐먹지? | 맛있는 한 끼 선택을 응원합니다!</p>
+    </footer>
+
+    <script>
+        // Database of Delicious Korean Foods & Desserts
+        const DATABASE = {
+            // Meal Databases
+            meal: {
+                한식: {
+                    밥류: [
+                        { name: "제육볶음 덮밥", emoji: "🥩", desc: "매콤달콤 양념에 불향 가득한 국민 밥도둑!" },
+                        { name: "전주 비빔밥", emoji: "🥗", desc: "신선한 나물과 고추장, 참기름의 완벽한 조화" },
+                        { name: "김치볶음밥", emoji: "🍳", desc: "매콤한 김치에 반숙 계란후라이 톡 터뜨려 한 입!" },
+                        { name: "불고기 덮밥", emoji: "🍲", desc: "달콤 짭조름한 양념 고기와 고소한 밥의 만남" },
+                        { name: "돌솥 굴밥 / 곤드레밥", emoji: "🍚", desc: "건강함 가득! 양념장 쓱쓱 비벼먹는 별미" },
+                        { name: "육회비빔밥", emoji: "🥩", desc: "신선한 육회와 아삭한 배, 신선한 야채의 조합" }
+                    ],
+                    "국/찌개류": [
+                        { name: "돼지 돼지김치찌개", emoji: "🍲", desc: "푹 익은 신김치와 돼지고기가 들어간 칼칼한 국물" },
+                        { name: "차돌박이 된장찌개", emoji: "🥘", desc: "구수한 된장과 고소한 차돌박이의 진한 풍미" },
+                        { name: "순두부찌개", emoji: "🍲", desc: "몽글몽글 순두부와 칼칼한 해물 양념 국물" },
+                        { name: "뼈해장국 / 감자탕", emoji: "🍖", desc: "진하고 진득한 국물에 부드러운 살코기 듬뿍!" },
+                        { name: "갈비탕", emoji: "🥣", desc: "맑고 깊은 육수에 큼직한 갈빗대가 들은 보양식" },
+                        { name: "부대찌개", emoji: "햄", emoji: "🥘", desc: "햄, 소시지, 라면사리까지 풍성한 한 냄비" }
+                    ],
+                    면류: [
+                        { name: "잔치국수", emoji: "🍜", desc: "시원한 멸치 육수에 깔끔한 소면 한 그릇" },
+                        { name: "바지락 칼국수", emoji: "🍲", desc: "시원한 바지락 국물과 쫄깃한 칼국수 면발" },
+                        { name: "비빔국수", emoji: "🌶️", desc: "새콤달콤 입맛 돋우는 매콤 소스의 면요리" },
+                        { name: "물냉면 / 비빔냉면", emoji: "🧊", desc: "살얼음 동동 시원함이 차오르는 깔끔한 한 젓가락" },
+                        { name: "콩국수", emoji: "🥣", desc: "진하고 고소한 콩국물이 일품인 정갈한 한 끼" }
+                    ],
+                    육류: [
+                        { name: "삼겹살 구이", emoji: "🥓", desc: "노릇노릇 불판에 구워 파채와 쌈 싸먹는 진리!" },
+                        { name: "돼지갈비 / 소갈비", emoji: "🍖", desc: "달콤 짭짤 양념이 쏙 밴 숯불 갈비" },
+                        { name: "한방 족발 / 보쌈", emoji: "🐷", desc: "쫀득한 족발과 촉촉한 수육, 보쌈김치 한 입!" },
+                        { name: "간장/양념 찜닭", emoji: "🍗", desc: "단짠 양념에 당면과 감자, 닭고기가 듬뿍" },
+                        { name: "닭볶음탕", emoji: "🍲", desc: "칼칼하고 매콤한 양념에 포슬포슬 감자" }
+                    ],
+                    "생선/해산물류": [
+                        { name: "고등어 / 갈치구이", emoji: "🐟", desc: "겉은 바삭하고 속은 촉촉하게 구워진 생선구이" },
+                        { name: "해물찜 / 아구찜", emoji: "🦞", desc: "콩나물 아삭! 매콤한 양념에 푸짐한 해산물" },
+                        { name: "갈치조림", emoji: "🥘", desc: "칼칼한 양념에 푹 무른 무와 부드러운 갈치살" },
+                        { name: "낙지볶음 / 오징어볶음", emoji: "🐙", desc: "매콤한 불향에 밥과 함께 비벼먹는 해산물 볶음" },
+                        { name: "모둠 회덮밥", emoji: "🥗", desc: "신선한 회와 채소, 초고추장의 매콤 새콤함" }
+                    ]
+                },
+                일식: {
+                    밥류: [
+                        { name: "가츠동 (돈까스덮밥)", emoji: "🍲", desc: "바삭한 돈까스에 촉촉한 계란과 타레 소스" },
+                        { name: "사케동 (연어덮밥)", emoji: "🍚", desc: "입에서 사르르 녹는 부드러운 신선한 연어" },
+                        { name: "규동 (소고기덮밥)", emoji: "🥣", desc: "얇게 썬 소고기와 양파를 달콤하게 조려낸 덮밥" },
+                        { name: "장어덮밥 (우나기동)", emoji: "진", emoji: "🍱", desc: "진한 특제 소스를 발라 구운 영양 만점 장어" },
+                        { name: "카레라이스", emoji: "🍛", desc: "진하고 풍부한 향의 일본식 카레와 아삭한 아게" }
+                    ],
+                    "국/찌개류": [
+                        { name: "오뎅나베 (어묵탕)", emoji: "🍲", desc: "따뜻하고 시원한 국물에 다양한 고급 어묵" },
+                        { name: "스키야키", emoji: "🥘", desc: "달콤짭조름한 간장 육수에 소고기와 채소, 날계란" },
+                        { name: "돈까스 김치나베", emoji: "🍲", desc: "얼큰한 김치 국물에 촉촉하게 적셔진 돈까스" },
+                        { name: "창코나베", emoji: "🍲", desc: "고기와 해산물, 채소가 풍성하게 들어간 진한 전골" }
+                    ],
+                    면류: [
+                        { name: "돈코츠 라멘", emoji: "🍜", desc: "돼지사골을 진하게 우려낸 고소하고 진한 라멘" },
+                        { name: "튀김 우동", emoji: "🍥", desc: "따뜻하고 깔끔한 가쓰오부시 육수에 바삭 튀김" },
+                        { name: "야키소바", emoji: "🍝", desc: "철판에 볶아낸 감칠맛 나는 일본식 볶음면" },
+                        { name: "냉모밀 / 자루소바", emoji: "🧊", desc: "시원한 츠유 소스에 콕 찍어 먹는 메밀면" },
+                        { name: "마제소바", emoji: "🍜", desc: "민찌 고기와 계란 노른자, 특제 소스를 비벼먹는 비빔면" }
+                    ],
+                    육류: [
+                        { name: "일식 로스/히레 카츠", emoji: "🥩", desc: "두툼한 고기 육즙과 극강의 바삭함!" },
+                        { name: "치킨 가라아게", emoji: "🍗", desc: "바삭하고 짭조름하게 튀겨낸 일본식 닭튀김" },
+                        { name: "함박 스테이크", emoji: "🍳", desc: "육즙이 팡팡 터지는 부드러운 패티와 데미글라스 소스" },
+                        { name: "야키토리 (모둠 꼬치)", emoji: "🍢", desc: "숯불 향이 솔솔 나는 다양한 닭고기 꼬치구이" }
+                    ],
+                    "생선/해산물류": [
+                        { name: "모둠 모듬초밥", emoji: "🍣", desc: "신선한 제철 생선과 밥의 정갈한 완벽 비율" },
+                        { name: "메로구이", emoji: "🐟", desc: "부드럽고 고소한 기름기가 일품인 고급 생선구이" },
+                        { name: "카이센동", emoji: "해", emoji: "🍚", desc: "각종 신선한 해산물이 듬뿍 올라간 모둠 해산물 덮밥" },
+                        { name: "야나기 모둠 회", emoji: "🐟", desc: "깔끔하고 정갈하게 써려진 제철 생선회" }
+                    ]
+                },
+                중식: {
+                    밥류: [
+                        { name: "중화 볶음밥", emoji: "🍛", desc: "고슬고슬 불맛 나게 볶아낸 계란 볶음밥과 짜장 소스" },
+                        { name: "마파두부밥", emoji: "매", emoji: "🌶️", desc: "매콤한 두반장 소스와 부드러운 두부의 만남" },
+                        { name: "잡채밥", emoji: "🍲", desc: "당면과 당근, 고기를 짭조름하게 볶아 얹은 밥" },
+                        { name: "유산슬밥", emoji: "🥘", desc: "해산물과 고기, 버섯을 걸쭉하게 볶아낸 고급 요리" }
+                    ],
+                    "국/찌개류": [
+                        { name: "해물 짬뽕국", emoji: "🍜", desc: "얼큰하고 칼칼한 불맛 해물 국물" },
+                        { name: "마라탕", emoji: "🍲", desc: "얼얼하고 매콤 중독성 최고인 알싸한 마라 국물" },
+                        { name: "울면", emoji: "🥣", desc: "계란을 풀고 해산물을 넣어 걸쭉하고 시원한 국물" },
+                        { name: "훠궈 (중식 샤브샤브)", emoji: "🥘", desc: "홍탕과 백탕에 원하는 재료를 퐁당 넣어 먹는 재미" }
+                    ],
+                    면류: [
+                        { name: "옛날 짜장면", emoji: "🍜", desc: "달콤 짭조름 고소한 춘장 소스의 영원한 국민 음식" },
+                        { name: "차돌 삼선짬뽕", emoji: "🌶️", desc: "해산물과 차돌박이가 어우러진 진한 불맛 짬뽕" },
+                        { name: "마라샹궈", emoji: "🥘", desc: "알싸한 마라 소스에 면과 각종 재료를 볶아낸 별미" },
+                        { name: "간짜장", emoji: "🧅", desc: "아삭한 양파와 고기를 즉석에서 볶아낸 풍미 깊은 짜장" }
+                    ],
+                    육류: [
+                        { name: "찹쌀 탕수육 (꿔바로우)", emoji: "🧆", desc: "바삭 쫀득한 튀김 옷에 새콤달콤한 소스" },
+                        { name: "깐풍기", emoji: "🍗", desc: "매콤 달콤 새콤한 양념으로 볶아낸 바삭 닭고기" },
+                        { name: "동파육", emoji: "🥩", desc: "입에서 부드럽게 무너지는 부드러운 돼지고기 요리" },
+                        { name: "유린기", emoji: "🥗", desc: "바삭한 닭튀김 위에 아삭한 양상추와 간장 소스" },
+                        { name: "양꼬치", emoji: "🍢", desc: "특제 쯔란 시즈닝을 찍어먹는 고소하고 쫄깃한 양꼬치" }
+                    ],
+                    "생선/해산물류": [
+                        { name: "칠리 / 크림 새우", emoji: "🍤", desc: "통통한 새우 튀김에 달콤매콤 칠리 또는 고소 크림 소스" },
+                        { name: "전가복", emoji: "🦞", desc: "전복, 해삼 등 귀한 해산물이 가득한 보양 중식" },
+                        { name: "팔보채", emoji: "🦑", desc: "8가지 신선한 해산물과 채소를 매콤하게 볶아낸 요리" }
+                    ]
+                },
+                양식: {
+                    밥류: [
+                        { name: "트러플 버섯 리조또", emoji: "🥘", desc: "진한 트러플 향과 부드럽고 꾸덕한 크림 리조또" },
+                        { name: "토마토 해산물 리조또", emoji: "🍅", desc: "상큼한 토마토 소스에 풍성한 해산물이 쏙" },
+                        { name: "김치 베이컨 필라프", emoji: "🍳", desc: "베이컨의 고소함과 김치의 매콤함이 어우러진 볶음밥" },
+                        { name: "오므라이스", emoji: "🍳", desc: "몽글몽글 계란 옷을 입은 부드러운 밥과 데미글라스" }
+                    ],
+                    "국/찌개류": [
+                        { name: "양송이 크림 스프", emoji: "🥣", desc: "부드럽고 고소하게 마음까지 녹여주는 스프" },
+                        { name: "굴라쉬", emoji: "🍲", desc: "소고기와 헝가리식 칠리 파프리카로 끓여낸 스튜" },
+                        { name: "클램 차우더", emoji: "🥣", desc: "조개와 감자가 들어간 진하고 조화로운 진국 크림 스튜" }
+                    ],
+                    면류: [
+                        { name: "까르보나라 파스타", emoji: "🍝", desc: "고소한 베이컨과 꾸덕하고 진한 크림 소스" },
+                        { name: "알리오 올리오", emoji: "🧄", desc: "마늘과 올리브 오일의 깔끔하고 고소한 풍미" },
+                        { name: "토마토 볼로네제", emoji: "🍝", desc: "다진 고기와 토마토를 오래 끓여낸 깊은 맛의 라구" },
+                        { name: "투움바 파스타", emoji: "🍤", desc: "매콤함이 더해져 느끼하지 않은 투움바 크림" },
+                        { name: "바질 페스토 파스타", emoji: "🌿", desc: "향긋한 바질과 고소한 잣이 들어간 프레시한 면요리" }
+                    ],
+                    육류: [
+                        { name: "안심 / 등심 스테이크", emoji: "🥩", desc: "육즙을 꼭 품은 그릴 위 고급 스테이크" },
+                        { name: "수제 치즈 버거", emoji: "🍔", desc: "두툼한 소고기 패티와 녹아내리는 치즈의 풍미" },
+                        { name: "바비큐 립", emoji: "🍖", desc: "달콤한 바비큐 소스를 발라 노릇하게 구워낸 립" },
+                        { name: "치킨 또르띠아 랩", emoji: "🌯", desc: "신선한 채소와 치킨너겟, 또르띠아의 상큼함" }
+                    ],
+                    "생선/해산물류": [
+                        { name: "화덕 고르곤졸라 / 마르게리따 피자", emoji: "🍕", desc: "바삭하고 고소한 도우와 늘어나는 치즈" },
+                        { name: "연어 스테이크", emoji: "🐟", desc: "겉은 바삭하고 속은 촉촉한 연어구이와 타르타르" },
+                        { name: "감바스 알 아히요", emoji: "🍤", desc: "올리브 오일에 마늘과 통통한 새우, 바게트 빵" }
+                    ]
+                },
+                기타: {
+                    밥류: [
+                        { name: "인도 버터치킨 카레", emoji: "🍛", desc: "부드러운 난에 찍어먹는 진한 인도식 카레" },
+                        { name: "나시고랭", emoji: "🍳", desc: "단짠 스위트 소스에 볶아낸 인도네시아식 볶음밥" },
+                        { name: "멕시칸 브리또", emoji: "🌯", desc: "고기, 밥, 콩, 사워크림이 가득 찬 든든한 랩" }
+                    ],
+                    "국/찌개류": [
+                        { name: "소고기 쌀국수 (포)", emoji: "🍜", desc: "진한 소고기 육수에 숙주와 양파가 가득" },
+                        { name: "똠얌꿍", emoji: "🍲", desc: "매콤, 새콤, 달콤함이 오묘하게 어우러진 세계 3대 스튜" },
+                        { name: "마라 샹궈 / 훠궈", emoji: "🥘", desc: "색다른 향신료의 알싸함을 맛볼 수 있는 스튜" }
+                    ],
+                    면류: [
+                        { name: "팟타이", emoji: "🍝", desc: "새우와 계란, 숙주를 팟타이 소스에 볶은 태국 볶음면" },
+                        { name: "분짜", emoji: "🥗", desc: "숯불 돼지고기와 쌀국수를 상큼한 늑맘 소스에 적셔먹는 요리" },
+                        { name: "야키우동", emoji: "🍜", desc: "각종 채소와 해산물을 특제 소스로 볶은 면" }
+                    ],
+                    육류: [
+                        { name: "소고기 타코", emoji: "🌮", desc: "또르띠아에 다진 고기, 살사 소스를 얹어먹는 멕시칸" },
+                        { name: "카오만가이 (치킨라이스)", emoji: "🍗", desc: "부드럽게 삶아낸 닭고기와 특제 생강 소스" },
+                        { name: "케밥", emoji: "🥙", desc: "빙글빙글 구워낸 고기와 신선한 야채가 가득" }
+                    ],
+                    "생선/해산물류": [
+                        { name: "푸팟퐁커리", emoji: "🦀", desc: "바삭한 소프트쉘 크랩에 부드러운 커리 계란 소스" },
+                        { name: "쉬림프 타코", emoji: "🌮", desc: "바삭한 새우와 상큼한 라임 살사 소스의 조화" },
+                        { name: "Ceviche (세비체)", emoji: "🥗", desc: "상큼한 라임 즙에 재운 신선한 해산물 샐러드" }
+                    ]
+                }
+            },
+            // Dessert Databases
+            dessert: {
+                "케이크 / 빵류": [
+                    { name: "딸기 생크림 케이크", emoji: "🍰", desc: "달콤 상큼한 딸기와 부드러운 생크림의 클래식!" },
+                    { name: "초코 무스 케이크", emoji: "🍫", desc: "진하고 꾸덕한 진한 초콜릿의 달콤함" },
+                    { name: "소금빵 (시오빵)", emoji: "🥐", desc: "겉은 바삭 짭조름, 속은 버터 풍미 가득!" },
+                    { name: "크로플", emoji: "🧇", desc: "바삭한 크로와상을 와플 팬에 눌러 바닐라 아이스크림 얹기" },
+                    { name: "베이글 & 크림치즈", emoji: "🥯", desc: "쫄깃한 베이글에 대파/플레인 크림치즈 듬뿍" }
+                ],
+                "빙수 / 아이스크림": [
+                    { name: "인절미 팥빙수", emoji: "🍧", desc: "고소한 콩고물과 쫄깃한 떡, 달콤한 팥의 얼음 빙수" },
+                    { name: "망고 눈꽃 빙수", emoji: "🥭", desc: "입에서 사르르 녹는 우유 얼음 위 달콤한 망고" },
+                    { name: "젤라또 (아이스크림)", emoji: "🍨", desc: "쫀득하고 진한 이탈리안 수제 아이스크림" },
+                    { name: "ソフトクリーム (아이스크림 콘)", emoji: "🍦", desc: "부드럽고 고소한 우유 상하목장 아이스크림" }
+                ],
+                "음료 / 카페": [
+                    { name: "아이스 아메리카노", emoji: "☕", desc: "식후 디저트의 진리! 깔끔하고 시원한 원두 향" },
+                    { name: "바닐라 빈 라떼", emoji: "🥛", desc: "부드럽고 달콤한 바닐라 풍미 가득 라떼" },
+                    { name: "버블 밀크티", emoji: "🧋", desc: "쫄깃한 타피오카 펄과 고소한 우유 밀크티" },
+                    { name: "자몽 / 청포도 에이드", emoji: "🍹", desc: "톡 쏘는 탄산과 톡톡 씹히는 과즙의 청량함" },
+                    { name: "말차 스무디", emoji: "🍵", desc: "쌉싸름하고 고소한 제주 말차의 풍미" }
+                ],
+                "구움과자 / 떡": [
+                    { name: "휘낭시에 / 마들렌", emoji: "🧁", desc: "버터 향이 솔솔 나는 겉바속촉 구움과자" },
+                    { name: "마카롱", emoji: "뚱", emoji: "🍬", desc: "알록달록 쫀득한 꼬꼬대와 뚱뚱한 필링" },
+                    { name: "찹쌀떡 / 개성주악", emoji: "🍡", desc: "쫄깃하고 조청이 팡 터지는 전통 한과 디저트" },
+                    { name: "에그타르트", emoji: "🥧", desc: "바삭한 페스츄리 속 부드럽고 커스터드 필링" },
+                    { name: "츄러스", emoji: "🥨", desc: "시나몬 설탕이 솔솔 뿌려진 갓 튀긴 츄러스" }
+                ]
+            }
+        };
+
+        // State Machine
+        let currentStep = 0;
+        let selectedType = null; // 'meal' or 'dessert'
+        let selectedCategory = null; // '한식', '일식' or '케이크/빵류'
+        let selectedSubCategory = null; // '밥류', '국류' etc
+        let currentResultFood = null;
+        let isSpinning = false;
+
+        // Navigation Controllers
+        function goToStep(step) {
+            currentStep = step;
+            
+            // Hide all sections
+            for(let i=0; i<=4; i++) {
+                const sec = document.getElementById(`step${i}`);
+                if(sec) sec.classList.add('hidden');
+                if(sec) sec.classList.remove('flex');
+            }
+
+            // Show progress bar for step 1~3
+            const progressNav = document.getElementById('progressNav');
+            if(step >= 1 && step <= 3) {
+                progressNav.classList.remove('hidden');
+                updateProgressBar(step);
+            } else {
+                progressNav.classList.add('hidden');
+            }
+
+            // Show active step
+            const activeSec = document.getElementById(`step${step}`);
+            if(activeSec) {
+                activeSec.classList.remove('hidden');
+                activeSec.classList.add('flex');
+            }
+        }
+
+        function updateProgressBar(step) {
+            const bar = document.getElementById('progressBar');
+            const text = document.getElementById('stepIndicator');
+            
+            let totalSteps = selectedType === 'meal' ? 3 : 2;
+            let currentDisplayStep = step;
+            if (selectedType === 'dessert' && step === 2) currentDisplayStep = 2; // Dessert finishes at Step 2 choice
+
+            let percent = (currentDisplayStep / totalSteps) * 100;
+            bar.style.width = `${percent}%`;
+            text.innerText = `${currentDisplayStep} / ${totalSteps} 단계`;
+        }
+
+        function goBack() {
+            if (currentStep === 1) {
+                goToStep(0);
+            } else if (currentStep === 2) {
+                goToStep(1);
+            } else if (currentStep === 3) {
+                goToStep(2);
+            }
+        }
+
+        function startApp() {
+            goToStep(1);
+        }
+
+        // STEP 1: Type Selection
+        function selectType(type) {
+            selectedType = type;
+            renderStep2();
+            goToStep(2);
+        }
+
+        // STEP 2: Main Category Render
+        function renderStep2() {
+            const grid = document.getElementById('step2Grid');
+            const title = document.getElementById('step2Title');
+            grid.innerHTML = '';
+
+            if (selectedType === 'meal') {
+                title.innerText = "어떤 스타일의 식사가 땡기시나요?";
+                const categories = [
+                    { name: "한식", emoji: "🍚", color: "from-orange-50 to-amber-50 border-orange-200 hover:border-orange-400" },
+                    { name: "일식", emoji: "🍣", color: "from-red-50 to-rose-50 border-red-200 hover:border-red-400" },
+                    { name: "중식", emoji: "🥢", color: "from-amber-50 to-yellow-50 border-amber-200 hover:border-amber-400" },
+                    { name: "양식", emoji: "🍝", color: "from-emerald-50 to-teal-50 border-emerald-200 hover:border-emerald-400" },
+                    { name: "기타", emoji: "🌮", color: "from-purple-50 to-indigo-50 border-purple-200 hover:border-purple-400" }
+                ];
+
+                categories.forEach(cat => {
+                    grid.innerHTML += `
+                        <button onclick="selectCategory('${cat.name}')" class="btn-pop p-4 bg-gradient-to-br ${cat.color} border-2 rounded-2xl flex flex-col items-center justify-center text-center">
+                            <span class="text-4xl mb-2">${cat.emoji}</span>
+                            <span class="font-extrabold text-gray-800 text-base">${cat.name}</span>
+                        </button>
+                    `;
+                });
+            } else {
+                title.innerText = "어떤 디저트를 즐기고 싶으신가요?";
+                const categories = [
+                    { name: "케이크 / 빵류", emoji: "🥐", color: "from-pink-50 to-rose-50 border-pink-200" },
+                    { name: "빙수 / 아이스크림", emoji: "🍨", color: "from-blue-50 to-sky-50 border-blue-200" },
+                    { name: "음료 / 카페", emoji: "☕", color: "from-amber-50 to-orange-50 border-amber-200" },
+                    { name: "구움과자 / 떡", emoji: "🍡", color: "from-purple-50 to-fuchsia-50 border-purple-200" }
+                ];
+
+                categories.forEach(cat => {
+                    grid.innerHTML += `
+                        <button onclick="selectCategory('${cat.name}')" class="btn-pop p-4 bg-gradient-to-br ${cat.color} border-2 rounded-2xl flex flex-col items-center justify-center text-center">
+                            <span class="text-4xl mb-2">${cat.emoji}</span>
+                            <span class="font-extrabold text-gray-800 text-sm sm:text-base">${cat.name}</span>
+                        </button>
+                    `;
+                });
+            }
+        }
+
+        function selectCategory(catName) {
+            selectedCategory = catName;
+
+            if (selectedType === 'meal') {
+                renderStep3();
+                goToStep(3);
+            } else {
+                // Dessert skips step 3 and goes directly to slot result
+                selectedSubCategory = null;
+                showResultScreen();
+            }
+        }
+
+        // STEP 3: Sub Category Render (Meals only)
+        function renderStep3() {
+            const grid = document.getElementById('step3Grid');
+            grid.innerHTML = '';
+
+            const subCategories = [
+                { name: "밥류", emoji: "🍚" },
+                { name: "국/찌개류", emoji: "🍲" },
+                { name: "면류", emoji: "🍜" },
+                { name: "육류", emoji: "🥩" },
+                { name: "생선/해산물류", emoji: "🐟" }
+            ];
+
+            subCategories.forEach(sub => {
+                grid.innerHTML += `
+                    <button onclick="selectSubCategory('${sub.name}')" class="btn-pop p-4 bg-white border-2 border-orange-100 hover:border-orange-400 rounded-2xl flex flex-col items-center justify-center text-center shadow-sm">
+                        <span class="text-3xl mb-1">${sub.emoji}</span>
+                        <span class="font-extrabold text-gray-800 text-sm sm:text-base">${sub.name}</span>
+                    </button>
+                `;
+            });
+        }
+
+        function selectSubCategory(subName) {
+            selectedSubCategory = subName;
+            showResultScreen();
+        }
+
+        // STEP 4: Slot Machine & Result logic
+        function showResultScreen() {
+            goToStep(4);
+            rollRandomMenu();
+        }
+
+        function getCandidateList() {
+            if (selectedType === 'meal') {
+                return DATABASE.meal[selectedCategory][selectedSubCategory] || [];
+            } else {
+                return DATABASE.dessert[selectedCategory] || [];
+            }
+        }
+
+        function rollRandomMenu() {
+            if (isSpinning) return;
+
+            const candidates = getCandidateList();
+            if (!candidates || candidates.length === 0) {
+                alert("해당 조건의 음식 데이터가 부족합니다.");
+                return;
+            }
+
+            isSpinning = true;
+
+            // UI State updates
+            document.getElementById('spinScreen').classList.remove('hidden');
+            document.getElementById('spinScreen').classList.add('flex');
+            document.getElementById('resultScreen').classList.add('hidden');
+            document.getElementById('resultScreen').classList.remove('flex');
+            document.getElementById('resultActions').classList.add('hidden');
+            document.getElementById('resultActions').classList.remove('flex');
+
+            const spinEmoji = document.getElementById('spinEmoji');
+            const spinName = document.getElementById('spinName');
+            const spinCategoryTag = document.getElementById('spinCategoryTag');
+
+            let tagText = selectedType === 'meal' 
+                ? `${selectedCategory} > ${selectedSubCategory}` 
+                : `디저트 > ${selectedCategory}`;
+            spinCategoryTag.innerText = tagText;
+
+            let counter = 0;
+            let speed = 50;
+            const maxSpins = 20;
+
+            function cycle() {
+                const randomPick = candidates[Math.floor(Math.random() * candidates.length)];
+                spinEmoji.innerText = randomPick.emoji;
+                spinName.innerText = randomPick.name;
+
+                counter++;
+                if (counter < maxSpins) {
+                    if (counter > maxSpins - 6) speed += 50;
+                    setTimeout(cycle, speed);
+                } else {
+                    setTimeout(() => {
+                        displayFinalResult(randomPick);
+                    }, speed);
+                }
+            }
+
+            cycle();
+        }
+
+        function displayFinalResult(food) {
+            currentResultFood = food;
+            isSpinning = false;
+
+            // Hide Slot, Show Result
+            document.getElementById('spinScreen').classList.add('hidden');
+            document.getElementById('spinScreen').classList.remove('flex');
+
+            document.getElementById('resEmoji').innerText = food.emoji;
+            document.getElementById('resName').innerText = food.name;
+            document.getElementById('resDesc').innerText = `"${food.desc}"`;
+
+            let tagText = selectedType === 'meal' 
+                ? `${selectedCategory} • ${selectedSubCategory}` 
+                : `디저트 • ${selectedCategory}`;
+            document.getElementById('resTags').innerText = tagText;
+
+            // Setup Map Links
+            const query = encodeURIComponent(`주변 ${food.name} 맛집`);
+            document.getElementById('naverMapLink').href = `https://map.naver.com/v5/search/${query}`;
+            document.getElementById('kakaoMapLink').href = `https://map.kakao.com/link/search/${query}`;
+
+            document.getElementById('resultScreen').classList.remove('hidden');
+            document.getElementById('resultScreen').classList.add('flex');
+            document.getElementById('resultActions').classList.remove('hidden');
+            document.getElementById('resultActions').classList.add('flex');
+        }
+
+        // Confirm Choice & Celebrate
+        function confirmAndReset() {
+            // Confetti Explosion
+            confetti({
+                particleCount: 150,
+                spread: 80,
+                origin: { y: 0.6 },
+                colors: ['#f97316', '#fbbf24', '#10b981', '#ec4899', '#3b82f6']
+            });
+
+            // Play celebratory sound note via AudioContext
+            try {
+                const ctx = new (window.AudioContext || window.webkitAudioContext)();
+                const osc = ctx.createOscillator();
+                const gain = ctx.createGain();
+                osc.type = 'triangle';
+                osc.frequency.setValueAtTime(523.25, ctx.currentTime); // C5
+                osc.frequency.exponentialRampToValueAtTime(659.25, ctx.currentTime + 0.15); // E5
+                osc.frequency.exponentialRampToValueAtTime(783.99, ctx.currentTime + 0.3); // G5
+                gain.gain.setValueAtTime(0.2, ctx.currentTime);
+                gain.gain.exponentialRampToValueAtTime(0.01, ctx.currentTime + 0.5);
+                osc.connect(gain);
+                gain.connect(ctx.destination);
+                osc.start();
+                osc.stop(ctx.currentTime + 0.5);
+            } catch(e) {}
+
+            // Reset state back to Landing page after short delay
+            setTimeout(() => {
+                selectedType = null;
+                selectedCategory = null;
+                selectedSubCategory = null;
+                currentResultFood = null;
+                goToStep(0);
+            }, 1200);
+        }
+
+        // Initialize App on Load
+        window.onload = function() {
+            goToStep(0);
+        };
+    </script>
+</body>
+</html>
